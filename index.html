@@ -1,4 +1,4 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>光影之間｜印象派 VR 虛擬畫廊</title><style>html,body{margin:0;height:100%;overflow:hidden;background:#101820;font-family:system-ui,'Microsoft JhengHei',sans-serif;color:#fff}canvas{display:block}#hud{position:absolute;left:18px;top:18px;background:#10202bd9;border:1px solid #ffffff33;border-radius:14px;padding:15px 19px;max-width:340px;pointer-events:none;line-height:1.7}#hud strong{font-size:20px;letter-spacing:2px}#hud small{color:#d8d4c7}#start{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);border:1px solid #e7d5ad;background:#162b35ee;color:white;padding:12px 24px;border-radius:30px;cursor:pointer;font-size:15px}#hint{position:absolute;right:18px;bottom:18px;font-size:12px;color:#e5e2d8;background:#12232cb8;padding:10px;border-radius:8px}body.vr #hud,body.vr #start,body.vr #hint{display:none}@media(max-width:600px){#hud{font-size:12px;max-width:260px}#hud strong{font-size:16px}#hint{display:none}}</style><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"}}</script></head><body><div id="hud"><strong>光影之間</strong><div>印象派與後印象派｜十件經典作品</div><small>電腦：點擊「開始漫遊」，W A S D 移動，滑鼠轉向，Esc 解除滑鼠。<br>Quest 3：按「ENTER VR」，左搖桿移動、右搖桿轉向；扳機點畫作放大介紹，點地面瞬移。</small></div><button id="start">開始漫遊 · 點擊鎖定滑鼠</button><div id="hint">作品圖檔：paints/　｜　WebXR 需 HTTPS</div><script type="module">
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>光影之間｜印象派 VR 虛擬畫廊</title><style>html,body{margin:0;height:100%;overflow:hidden;background:#101820;font-family:system-ui,'Microsoft JhengHei',sans-serif;color:#fff}canvas{display:block}#hud{position:absolute;left:18px;top:18px;background:#10202bd9;border:1px solid #ffffff33;border-radius:14px;padding:15px 19px;max-width:340px;pointer-events:none;line-height:1.7}#hud strong{font-size:20px;letter-spacing:2px}#hud small{color:#d8d4c7}#start{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);border:1px solid #e7d5ad;background:#162b35ee;color:white;padding:12px 24px;border-radius:30px;cursor:pointer;font-size:15px}#hint{position:absolute;right:18px;bottom:18px;font-size:12px;color:#e5e2d8;background:#12232cb8;padding:10px;border-radius:8px}body.vr #hud,body.vr #start,body.vr #hint{display:none}@media(max-width:600px){#hud{font-size:12px;max-width:260px}#hud strong{font-size:16px}#hint{display:none}}</style><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"}}</script></head><body><div id="hud"><strong>光影之間</strong><div>印象派與後印象派｜十件經典作品</div><small>電腦：點擊「開始漫遊」，W A S D 移動，滑鼠轉向，Esc 解除滑鼠。<br>Quest 3：按「ENTER VR」，左搖桿移動、右搖桿轉向；扳機點畫作放大介紹；診斷版暫停地板瞬移。</small></div><button id="start">開始漫遊 · 點擊鎖定滑鼠</button><div id="hint">作品圖檔：paints/　｜　WebXR 需 HTTPS</div><script type="module">
 import * as THREE from 'three';
 import {VRButton} from 'three/addons/webxr/VRButton.js';
 const exhibits=[
@@ -65,13 +65,68 @@ function closeDetail(){if(!detailPanel)return;scene.remove(detailPanel);detailPa
 function showDetail(i){if(activeExhibit===i){closeDetail();return}closeDetail();activeExhibit=i;const e=exhibits[i];const g=new THREE.Group();detailPanel=g;scene.add(g);const head=new THREE.Vector3();camera.getWorldPosition(head);const facing=new THREE.Vector3();camera.getWorldDirection(facing);facing.y=0;if(facing.lengthSq()<.01)facing.set(0,0,-1);facing.normalize();g.position.copy(head).addScaledVector(facing,2.25);g.position.y=head.y-.08;g.lookAt(head.x,g.position.y,head.z);const bg=new THREE.Mesh(new THREE.PlaneGeometry(3.6,2.5),new THREE.MeshBasicMaterial({color:0x191b20,side:THREE.DoubleSide,depthTest:false}));bg.renderOrder=20;g.add(bg);const art=clickable.find(o=>o.userData.exhibitIndex===i&&o.geometry.parameters.width===2.35);if(art?.material.map){const img=art.material.map.image;const ratio=img.width/img.height;const w=Math.min(1.75,2.15*ratio),h=w/ratio;const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:art.material.map,side:THREE.DoubleSide,depthTest:false,toneMapped:false}));mesh.position.set(-.86,0,.02);mesh.renderOrder=21;g.add(mesh)}const tx=makeTextTexture([e.name,e.artist+' · '+e.year,descriptions[i]]);const m=new THREE.MeshBasicMaterial({map:tx,side:THREE.DoubleSide,transparent:false,depthTest:false});m.userData.detailText=true;const info=new THREE.Mesh(new THREE.PlaneGeometry(1.65,1.0),m);info.position.set(.87,0,.025);info.renderOrder=22;g.add(info)}
 const controllers=[renderer.xr.getController(0),renderer.xr.getController(1)];const raycaster=new THREE.Raycaster();const tempMatrix=new THREE.Matrix4();const floorPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0);const hit=new THREE.Vector3();const rays=[];
 function setRayFromController(ctrl){ctrl.updateWorldMatrix(true,false);tempMatrix.identity().extractRotation(ctrl.matrixWorld);raycaster.ray.origin.setFromMatrixPosition(ctrl.matrixWorld);raycaster.ray.direction.set(0,0,-1).applyMatrix4(tempMatrix).normalize()}
-function trigger(ctrl){setRayFromController(ctrl);if(detailPanel){closeDetail();return}const intersections=raycaster.intersectObjects(clickable,false);if(intersections.length){showDetail(intersections[0].object.userData.exhibitIndex);return}if(raycaster.ray.intersectPlane(floorPlane,hit)&&hit.x>-13.1&&hit.x<13.1&&hit.z>-5.8&&hit.z<5.8){const head=new THREE.Vector3();camera.getWorldPosition(head);rig.position.x+=hit.x-head.x;rig.position.z+=hit.z-head.z}}
+function trigger(ctrl){setRayFromController(ctrl);if(detailPanel){closeDetail();return}const intersections=raycaster.intersectObjects(clickable,false);if(intersections.length){showDetail(intersections[0].object.userData.exhibitIndex);return}/* 地板瞬移暫時停用，避免與搖桿/扳機輸入衝突。 */ }
 controllers.forEach(ctrl=>{rig.add(ctrl);const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0),new THREE.Vector3(0,0,-6)]),new THREE.LineBasicMaterial({color:0xc8aa6b,transparent:true,opacity:.75}));ctrl.add(line);rays.push(line);ctrl.addEventListener('selectstart',()=>trigger(ctrl))});
 renderer.domElement.addEventListener('pointerdown',event=>{if(renderer.xr.isPresenting)return;if(document.pointerLockElement===renderer.domElement){const ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2(0,0),camera);const hits=ray.intersectObjects(clickable,false);if(detailPanel)closeDetail();else if(hits.length)showDetail(hits[0].object.userData.exhibitIndex)}});
 renderer.xr.addEventListener('sessionstart',()=>{document.body.classList.add('vr');camera.rotation.x=0});renderer.xr.addEventListener('sessionend',()=>document.body.classList.remove('vr'));
-const clock=new THREE.Clock();let turnLatch=false;
-function joystick(gp){const a=gp?.axes||[];const pairs=[[2,3],[0,1]];let best=[0,0],bestMagnitude=0;for(const [ix,iy] of pairs){if(a.length<=iy)continue;const x=Number(a[ix])||0,y=Number(a[iy])||0;const magnitude=Math.hypot(x,y);if(magnitude>bestMagnitude){best=[x,y];bestMagnitude=magnitude}}return best}
-function loop(){const dt=Math.min(clock.getDelta(),.05);if(!renderer.xr.isPresenting){const speed=(keys.ShiftLeft?5.5:2.6)*dt;let mx=(keys.KeyD?1:0)-(keys.KeyA?1:0),mz=(keys.KeyS?1:0)-(keys.KeyW?1:0);if(mx||mz){let len=Math.hypot(mx,mz);mx/=len;mz/=len;rig.position.x+=(mx*Math.cos(yaw)+mz*Math.sin(yaw))*speed;rig.position.z+=(-mx*Math.sin(yaw)+mz*Math.cos(yaw))*speed}}else{const session=renderer.xr.getSession();let moveX=0,moveZ=0,turn=0;for(const source of session.inputSources){if(!source.gamepad)continue;const [sx,sy]=joystick(source.gamepad);if(source.handedness==='left'){moveX=sx;moveZ=sy}else if(source.handedness==='right'){turn=sx}}const dead=v=>Math.abs(v)>.16?v:0;moveX=dead(moveX);moveZ=dead(moveZ);if(moveX||moveZ){const direction=new THREE.Vector3();camera.getWorldDirection(direction);direction.y=0;direction.normalize();const right=new THREE.Vector3().crossVectors(direction,new THREE.Vector3(0,1,0)).normalize();rig.position.addScaledVector(direction,-moveZ*2.3*dt);rig.position.addScaledVector(right,moveX*2.3*dt)}if(Math.abs(turn)>.7&&!turnLatch){rig.rotation.y-=Math.sign(turn)*Math.PI/6;turnLatch=true}else if(Math.abs(turn)<.3)turnLatch=false;}rig.position.x=THREE.MathUtils.clamp(rig.position.x,-12.8,12.8);rig.position.z=THREE.MathUtils.clamp(rig.position.z,-5.4,5.4);renderer.render(scene,camera)}renderer.setAnimationLoop(loop);
+// Quest 3 安全診斷版：僅讀取搖桿軸，不處理搖桿按鍵，也不阻止系統事件。
+const debugCanvas=document.createElement('canvas');debugCanvas.width=1024;debugCanvas.height=256;
+const debugCtx=debugCanvas.getContext('2d');const debugTex=new THREE.CanvasTexture(debugCanvas);
+const debugPanel=new THREE.Mesh(new THREE.PlaneGeometry(1.45,.36),new THREE.MeshBasicMaterial({map:debugTex,transparent:true,depthTest:false,side:THREE.DoubleSide}));
+debugPanel.position.set(0,-.65,-1.5);camera.add(debugPanel);debugPanel.visible=false;
+let debugLast=0;const clock=new THREE.Clock();let turnLatch=false;
+const forward=new THREE.Vector3(),right=new THREE.Vector3(),up=new THREE.Vector3(0,1,0);
+function readStick(gp){
+  if(!gp)return [0,0,'none'];
+  const a=gp.axes||[];
+  // WebXR standard mapping: thumbstick is axes[2],axes[3]; some runtimes expose only axes[0],axes[1].
+  if(a.length>=4)return [Number(a[2])||0,Number(a[3])||0,'2/3'];
+  if(a.length>=2)return [Number(a[0])||0,Number(a[1])||0,'0/1'];
+  return [0,0,'missing'];
+}
+function loop(){
+ const dt=Math.min(clock.getDelta(),.04);
+ if(!renderer.xr.isPresenting){
+   const speed=(keys.ShiftLeft?5.5:2.6)*dt;
+   let mx=(keys.KeyD?1:0)-(keys.KeyA?1:0),mz=(keys.KeyS?1:0)-(keys.KeyW?1:0);
+   if(mx||mz){let len=Math.hypot(mx,mz);mx/=len;mz/=len;rig.position.x+=(mx*Math.cos(yaw)+mz*Math.sin(yaw))*speed;rig.position.z+=(-mx*Math.sin(yaw)+mz*Math.cos(yaw))*speed}
+   debugPanel.visible=false;
+ }else{
+   const session=renderer.xr.getSession();let moveX=0,moveY=0,turn=0;
+   const info=[];
+   if(session){for(const source of session.inputSources){
+     const [sx,sy,pair]=readStick(source.gamepad);
+     info.push(`${source.handedness||'?'}:${pair} ${sx.toFixed(2)},${sy.toFixed(2)} axes=${source.gamepad?.axes?.length||0}`);
+     if(source.handedness==='left'){moveX=sx;moveY=sy}
+     if(source.handedness==='right')turn=sx;
+   }}
+   const dead=v=>Math.abs(v)>.18?v:0;moveX=dead(moveX);moveY=dead(moveY);
+   if(moveX||moveY){
+     camera.getWorldDirection(forward);forward.y=0;
+     if(forward.lengthSq()>.0001)forward.normalize();else forward.set(0,0,-1);
+     right.crossVectors(forward,up).normalize();
+     const speed=1.65*dt;
+     rig.position.addScaledVector(forward,-moveY*speed);
+     rig.position.addScaledVector(right,moveX*speed);
+   }
+   if(Math.abs(turn)>.72&&!turnLatch){rig.rotation.y-=Math.sign(turn)*Math.PI/6;turnLatch=true}
+   else if(Math.abs(turn)<.28)turnLatch=false;
+   debugPanel.visible=true;
+   const now=performance.now();if(now-debugLast>140){
+     debugLast=now;debugCtx.clearRect(0,0,1024,256);
+     debugCtx.fillStyle='rgba(0,0,0,.7)';debugCtx.fillRect(0,0,1024,256);
+     debugCtx.fillStyle='#fff';debugCtx.font='36px monospace';debugCtx.fillText('XR INPUT DIAGNOSTIC',24,50);
+     debugCtx.font='30px monospace';
+     info.slice(0,3).forEach((line,i)=>debugCtx.fillText(line,24,104+i*45));
+     if(!info.length)debugCtx.fillText('No controller input sources',24,104);
+     debugTex.needsUpdate=true;
+   }
+ }
+ rig.position.x=THREE.MathUtils.clamp(rig.position.x,-12.8,12.8);
+ rig.position.z=THREE.MathUtils.clamp(rig.position.z,-5.4,5.4);
+ renderer.render(scene,camera);
+}
+renderer.setAnimationLoop(loop);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 const vr=VRButton.createButton(renderer);document.body.appendChild(vr);vr.style.bottom='86px';vr.style.background='#203b43';vr.style.border='1px solid #d9c395';vr.style.borderRadius='24px';
 </script></body></html>
